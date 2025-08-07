@@ -36,8 +36,8 @@ def main():
                     os.system("cls" if os.name == "nt" else "clear")
                     print("File and Directory Operations:")
                     print(("-> "if change == 1 else " ") + "1. List files and folders on the FTP server")
-                    print(("-> "if change == 2 else " ") + "2. Change directory (on server or local)")
-                    print(("-> "if change == 3 else " ") + "3. Show the current directory on the server")
+                    print(("-> "if change == 2 else " ") + "2. Change directory on the FTP server")
+                    print(("-> "if change == 3 else " ") + "3. Show the current directory on the FTP server")
                     print(("-> "if change == 4 else " ") + "4. Create folders on the FTP server")
                     print(("-> "if change == 5 else " ") + "5. Delete folders on the FTP server")
                     print(("-> "if change == 6 else " ") + "6. Delete a file on the FTP server")
@@ -90,7 +90,7 @@ def main():
                 while True:
                     os.system("cls" if os.name == "nt" else "clear")
                     print("Upload/Download:")
-                    print(("-> " if change == 1 else " ") + "1. Download a file from the FTP server")
+                    print(("-> " if change == 1 else " ") + "1. Download a single file")
                     print(("-> " if change == 2 else " ") + "2. Upload a single file")
                     print(("-> " if change == 3 else " ") + "3. Download multiple files (wildcard support)")
                     print(("-> " if change == 4 else " ") + "4. Upload multiple files (wildcard support)")
@@ -178,7 +178,7 @@ def main():
                                 print("Invalid mode. Use 'A' for ASCII or 'I' for Binary.")
                             os.system("pause")
                         elif change == 2:
-                            command.status()
+                            command.status(control_socket)
                             os.system("pause")
                         elif change == 3:
                             command.transfer_passive_mode(control_socket)
