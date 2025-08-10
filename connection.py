@@ -38,9 +38,9 @@ def scan_for_virus(file_path, server_ip=ftpconfig.clamav_host, port=ftpconfig.cl
     client.sendall(file_size.to_bytes(8, 'big'))  
 
     with open(file_path, 'rb') as f:
-        while chunk := f.read(4096):
-            client.sendall(chunk)
-    
+        while (data := f.read(ftpconfig.buffer_size)):
+            client.sendall(data)
+
     reply = client.recv(1024)
     if reply != b'OK':
         print(f"[Client] Failed to send file {filename} to ClamAV agent.")

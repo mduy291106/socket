@@ -4,20 +4,18 @@ from ftp_config import ftpconfig, FTPMode
 import connection
 import side_function
 
-def pwd(control_socket: socket.socket) -> bool:
+def pwd(control_socket: socket.socket) -> str:
     try:
         response = side_function.send_command(control_socket, "PWD")
         if not response.startswith('257'):
             print(f"PWD command failed: {response}")
-            return False
-        current_directory = response.split('"')[1]
-        print(f"[Client] Current directory: {current_directory}")
-        return True
+            return ""
+        return response.split('"')[1]
     except Exception as e:
         print(f"[Client] Error getting current directory: {e}")
-        return False
+        return ""
 
-def ls(control_socket: socket.socket, directory: str = '') -> list[str]:
+def ls(control_socket: socket.socket, directory: str = '') -> str:
     if not pwd(control_socket):
         return []
     if ftpconfig.mode == FTPMode.PASSIVE:
@@ -36,7 +34,8 @@ def ls(control_socket: socket.socket, directory: str = '') -> list[str]:
 
     response = side_function.receive_response(control_socket)
     if not response.startswith('226'):
-        raise Exception(f"LIST command failed: {response}")
+        print(f"LIST command failed: {response}")
+        return ""
     return data.decode('utf-8', errors='ignore')
 
 def cd(control_socket: socket.socket, path: str) -> bool:
@@ -57,7 +56,8 @@ def cd(control_socket: socket.socket, path: str) -> bool:
 
 def mkdir(control_socket: socket.socket, path: str) -> bool:
     if not path:
-        raise ValueError("Directory name cannot be empty")
+        print("Directory name cannot be empty")
+        return False
     try:
         response = side_function.send_command(control_socket, f'MKD {path}')
         if not response.startswith('257'):
@@ -75,7 +75,12 @@ def remove_directory_recursively(control_socket: socket.socket, path: str) -> bo
         return False
     items = ls(control_socket).splitlines()
     if items is None:
-        return False
+        response = side_function.send_command(control_socket, f"RMD {path}")
+        if not response.startswith('250'):
+            print(f"RMD command failed: {response}")
+            return False
+        print(f"[Client] Removed directory {path}")
+        return True
 
     for item in items:
         parts = item.split()
@@ -105,8 +110,8 @@ def rmdir(control_socket: socket.socket, path: str) -> bool:
         print("Directory name cannot be empty")
         return False
     try:
-        a = remove_directory_recursively(control_socket, path)
-        return a
+        isRemoved = remove_directory_recursively(control_socket, path)
+        return isRemoved
     except Exception as e:
         print(f"[Client] Error removing directory: {e}")
         return False
@@ -324,7 +329,20 @@ def status(control_socket: socket.socket) -> bool:
         if not response.startswith('211'):
             print(f"STAT command failed: {response}")
             return False
+        peer_name = control_socket.getpeername()
+        remote_dir = pwd(control_socket)
+        print("--- Session Status ---")
+
+        print(f"🔗 Connected to: {peer_name[0]}:{peer_name[1]}")
+        
+        print(f"📦 Transfer Mode: {ftpconfig.transfer_mode.name}")
+        passive_status = 'ON' if ftpconfig.mode == FTPMode.PASSIVE else 'OFF'
+        print(f"📡 Passive Mode: {passive_status}")
+        
+        print(f"🖥️  Remote Directory: {remote_dir}")
+        print(f"💻 Local Directory:  {os.getcwd()}")
         print(f"[Client] Server status: {response}")
+        print("----------------------")
         return True
     except Exception as e:
         print(f"[Client] Error getting server status: {e}")

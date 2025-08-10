@@ -57,30 +57,36 @@ def main():
                         if change == 0:
                             break
                         elif change == 1:
+                            os.system("cls" if os.name == "nt" else "clear")
                             path = input("Enter path to list files: ")
                             print(command.ls(control_socket, path))
                             os.system("pause")
                         elif change == 2:
+                            os.system("cls" if os.name == "nt" else "clear")
                             path = input("Enter path to change directory: ")
                             command.cd(control_socket, path)
-                            print(f"Changed directory to: {path}")
                             os.system("pause")
                         elif change == 3:
-                            command.pwd(control_socket)
+                            os.system("cls" if os.name == "nt" else "clear")
+                            print(f"Current directory: {command.pwd(control_socket)}")
                             os.system("pause")
                         elif change == 4:
+                            os.system("cls" if os.name == "nt" else "clear")
                             path = input("Enter path to create directory: ")
                             command.mkdir(control_socket, path)
                             os.system("pause")
                         elif change == 5:
+                            os.system("cls" if os.name == "nt" else "clear")
                             path = input("Enter path to remove directory: ")
                             command.rmdir(control_socket, path)
                             os.system("pause")
                         elif change == 6:
+                            os.system("cls" if os.name == "nt" else "clear")
                             file = input("Enter file to delete: ")
                             command.delete(control_socket, file)
                             os.system("pause")
                         elif change == 7:
+                            os.system("cls" if os.name == "nt" else "clear")
                             old_name = input("Enter old file name: ")
                             new_name = input("Enter new file name: ")
                             command.rename(control_socket, old_name, new_name)
@@ -111,14 +117,17 @@ def main():
                         if change == 0:
                             break
                         elif change == 1:
+                            os.system("cls" if os.name == "nt" else "clear")
                             file = input("Enter file to download: ")
                             command.get(control_socket, file)
                             os.system("pause")
                         elif change == 2:
+                            os.system("cls" if os.name == "nt" else "clear")
                             file = input("Enter file to upload: ")
                             command.put(control_socket, file)
                             os.system("pause")
                         elif change == 3:
+                            os.system("cls" if os.name == "nt" else "clear")
                             files = input("Enter files to download (space-separated): ")
                             file_list = command.prompt(control_socket, files, 'mget')
                             check = input("Do you want to download these files? (y/n): ").strip().lower()
@@ -128,6 +137,7 @@ def main():
                                 print("Download cancelled.")
                             os.system("pause")
                         elif change == 4:
+                            os.system("cls" if os.name == "nt" else "clear")
                             files = input("Enter files to upload (space-separated): ")
                             file_list = command.prompt(control_socket, files, 'mput')
                             check = input("Do you want to upload these files? (y/n): ").strip().lower()
@@ -137,12 +147,14 @@ def main():
                                 print("Upload cancelled.")
                             os.system("pause")
                         elif change == 5:
-                            directory = input("Enter directory to upload: ")
-                            command.directory_put(control_socket, directory)
-                            os.system("pause")
-                        elif change == 6:
+                            os.system("cls" if os.name == "nt" else "clear")
                             directory = input("Enter directory to download: ")
                             command.directory_get(control_socket, directory)
+                            os.system("pause")
+                        elif change == 6:
+                            os.system("cls" if os.name == "nt" else "clear")
+                            directory = input("Enter directory to upload: ")
+                            command.directory_put(control_socket, directory)
                             os.system("pause")
             elif choice == 3:
                 change = 1
@@ -171,6 +183,7 @@ def main():
                         if change == 0:
                             break
                         elif change == 1:
+                            os.system("cls" if os.name == "nt" else "clear")
                             mode = input("Enter transfer mode (A for ASCII, I for Binary): ").strip().upper()
                             if mode in ["A", "I"]:
                                 command.transfer_ascii_binary_mode(control_socket, mode)
@@ -178,12 +191,15 @@ def main():
                                 print("Invalid mode. Use 'A' for ASCII or 'I' for Binary.")
                             os.system("pause")
                         elif change == 2:
+                            os.system("cls" if os.name == "nt" else "clear")
                             command.status(control_socket)
                             os.system("pause")
                         elif change == 3:
+                            os.system("cls" if os.name == "nt" else "clear")
                             command.transfer_passive_mode(control_socket)
                             os.system("pause")
                         elif change == 4:
+                            os.system("cls" if os.name == "nt" else "clear")
                             ip = input("Enter FTP server IP: ") or ftpconfig.host
                             port = int(input("Enter FTP server port: ") or ftpconfig.port)
                             user = input("Enter username: ") or ftpconfig.username
@@ -192,10 +208,16 @@ def main():
                             print("Connected to the FTP server.")
                             os.system("pause")
                         elif change == 5:
-                            connection.close_control_connection(control_socket)
-                            print("Disconnected from the FTP server.")
+                            os.system("cls" if os.name == "nt" else "clear")
+                            check = input("Are you sure you want to disconnect? (y/n): ").strip().lower()
+                            if check == 'y':
+                                connection.close_control_connection(control_socket)
+                                print("Disconnected from the FTP server.")
+                            else:
+                                print("Disconnection cancelled.")
                             os.system("pause")
                         elif change == 6:
+                            os.system("cls" if os.name == "nt" else "clear")
                             check = input("Are you sure you want to exit? (y/n): ").strip().lower()
                             if check == 'y':
                                 exit(0)
@@ -207,7 +229,7 @@ def main():
                             while True:
                                 os.system("cls" if os.name == "nt" else "clear")
                                 print("Help Text for Commands:")
-                                print(("-> " if panda == 1 else " ") + "ist files and folders on the FTP server")
+                                print(("-> " if panda == 1 else " ") + "List files and folders on the FTP server")
                                 print(("-> " if panda == 2 else " ") + "Change directory (on server or local)")
                                 print(("-> " if panda == 3 else " ") + "Show the current directory on the server")
                                 print(("-> " if panda == 4 else " ") + "Create folders on the FTP server")
@@ -241,60 +263,79 @@ def main():
                                     if panda == 0:
                                         break
                                     elif panda == 1:
+                                        os.system("cls" if os.name == "nt" else "clear")
                                         print(side_function.help_for_ls())
                                         os.system("pause")
                                     elif panda == 2:
+                                        os.system("cls" if os.name == "nt" else "clear")
                                         print(side_function.help_for_cd())
                                         os.system("pause")
                                     elif panda == 3:
+                                        os.system("cls" if os.name == "nt" else "clear")
                                         print(side_function.help_for_pwd())
                                         os.system("pause")
                                     elif panda == 4:
+                                        os.system("cls" if os.name == "nt" else "clear")
                                         print(side_function.help_for_mkdir())
                                         os.system("pause")
                                     elif panda == 5:
+                                        os.system("cls" if os.name == "nt" else "clear")
                                         print(side_function.help_for_rmdir())
                                         os.system("pause")
                                     elif panda == 6:
+                                        os.system("cls" if os.name == "nt" else "clear")
                                         print(side_function.help_for_delete())
                                         os.system("pause")
                                     elif panda == 7:
+                                        os.system("cls" if os.name == "nt" else "clear")
                                         print(side_function.help_for_rename())
                                         os.system("pause")
                                     elif panda == 8:
+                                        os.system("cls" if os.name == "nt" else "clear")
                                         print(side_function.help_for_get())
                                         os.system("pause")
                                     elif panda == 9:
+                                        os.system("cls" if os.name == "nt" else "clear")
                                         print(side_function.help_for_put())
                                         os.system("pause")
                                     elif panda == 10:
+                                        os.system("cls" if os.name == "nt" else "clear")
                                         print(side_function.help_for_mget())
                                         os.system("pause")
                                     elif panda == 11:
+                                        os.system("cls" if os.name == "nt" else "clear")
                                         print(side_function.help_for_mput())
                                         os.system("pause")
                                     elif panda == 12:
+                                        os.system("cls" if os.name == "nt" else "clear")
                                         print(side_function.help_for_dget())
                                         os.system("pause")
                                     elif panda == 13:
+                                        os.system("cls" if os.name == "nt" else "clear")
                                         print(side_function.help_for_dput())
                                         os.system("pause")
                                     elif panda == 14:
+                                        os.system("cls" if os.name == "nt" else "clear")
                                         print(side_function.help_for_transfer_mode())
                                         os.system("pause")
                                     elif panda == 15:
+                                        os.system("cls" if os.name == "nt" else "clear")
                                         print(side_function.help_for_status())
                                         os.system("pause")
                                     elif panda == 16:
+                                        os.system("cls" if os.name == "nt" else "clear")
                                         print(side_function.help_for_passive())
                                         os.system("pause")
                                     elif panda == 17:
+                                        os.system("cls" if os.name == "nt" else "clear")
                                         print(side_function.help_for_connect())
                                         os.system("pause")
                                     elif panda == 18:
+                                        os.system("cls" if os.name == "nt" else "clear")
                                         print(side_function.help_for_disconnect())
                                         os.system("pause")
                                     elif panda == 19:
+                                        os.system("cls" if os.name == "nt" else "clear")
                                         print(side_function.help_for_quit())
                                         os.system("pause")
             elif choice == 0:   

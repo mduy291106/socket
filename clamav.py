@@ -1,9 +1,7 @@
 import subprocess
 import socket
 import os
-
-HOST = '127.0.0.1'
-PORT = 9999
+from ftp_config import ftpconfig
 
 def scan_file(file_path):
     result = subprocess.run(['clamscan', file_path], capture_output=True, text=True)
@@ -21,7 +19,7 @@ def main():
         os.makedirs(create_directory, exist_ok=True)
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as server_socket:
             server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-            server_socket.bind((HOST, PORT))
+            server_socket.bind((ftpconfig.clamav_host, ftpconfig.clamav_port))
             server_socket.listen(1)
             try:
                 connect, addr = server_socket.accept()
@@ -38,12 +36,10 @@ def main():
                     with open(filepath, 'wb') as f:
                         while bytes_received < file_size:
                             remaining = file_size - bytes_received
-                            chunk_size = min(4096, remaining)
+                            chunk_size = min(ftpconfig.buffer_size, remaining)
                             data = connect.recv(chunk_size)
-                            
                             if not data:
                                 break
-
                             f.write(data)
                             bytes_received += len(data)
 

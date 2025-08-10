@@ -1,5 +1,4 @@
 import socket
-import time
 from ftp_config import ftpconfig
 
 def receive_response(sock: socket.socket) -> str:
@@ -29,7 +28,6 @@ def progress_bar(current: int, total: int, length: int = 50) -> None:
     filled_length = int(length * percent)
     bar = '█' * filled_length + '-' * (length - filled_length)
     print(f'\r|{bar}| {percent:.2%}', end='\r')
-    time.sleep(0.1)
     if current == total:
         print()
 
