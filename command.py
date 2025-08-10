@@ -1,6 +1,6 @@
 import os
 import socket
-from ftp_config import ftpconfig, FTPMode
+from ftp_config import ftpconfig, FTPMode, TransferMode
 import connection
 import side_function
 
@@ -315,9 +315,13 @@ def transfer_ascii_binary_mode(control_socket: socket.socket, mode: str) -> bool
         print("[Client] Invalid transfer mode. Use 'I' for binary or 'A' for ASCII.")
         return False
     try:
+        if mode == 'I':
+            ftpconfig.transfer_mode = TransferMode.BINARY
+        elif mode == 'A':
+            ftpconfig.transfer_mode = TransferMode.ASCII
         response = side_function.send_command(control_socket, f"TYPE {mode}")
-
         if response.startswith("200"):
+            print(f"[Client] Transfer mode set to {ftpconfig.transfer_mode.name}")
             return True
         else:
             print(f"[Client] Failed to set transfer mode: {response.strip()}")
@@ -335,15 +339,14 @@ def status(control_socket: socket.socket) -> bool:
         peer_name = control_socket.getpeername()
         remote_dir = pwd(control_socket)
         print("Session Status:")
-
-        print(f"🔗 Connected to: {peer_name[0]}:{peer_name[1]}")
-        
-        print(f"📦 Transfer Mode: {ftpconfig.transfer_mode.name}")
-        passive_status = 'ON' if ftpconfig.mode == FTPMode.PASSIVE else 'OFF'
-        print(f"📡 Passive Mode: {passive_status}")
-        
-        print(f"🖥️  Remote Directory: {remote_dir}")
-        print(f"💻 Local Directory: {os.getcwd()}")
+        print(f"Connected to: {peer_name[0]}:{peer_name[1]}")
+        print(f"Transfer Mode: {ftpconfig.transfer_mode.name}")
+        if ftpconfig.mode == FTPMode.ACTIVE:
+            print(f"Passive Mode: OFF")
+        else:
+            print(f"Passive Mode: ON")
+        print(f"Remote Directory: {remote_dir}")
+        print(f"Local Directory: {os.getcwd()}")
         print(f"[Client] Server status: {response}")
         return True
     except Exception as e:
