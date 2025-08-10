@@ -4,7 +4,7 @@ import subprocess
 import os
 import time
 import threading
-from side_function import*
+import side_function
 from ftp_config import ftpconfig
 
 def scan_for_virus(file_path, server_ip=ftpconfig.clamav_host, port=ftpconfig.clamav_port):
@@ -83,29 +83,37 @@ def create_control_socket(ip: str = ftpconfig.host, port: int = ftpconfig.port, 
         ctrl_sock.settimeout(ftpconfig.timeout)
         ctrl_sock.connect((ip, port))
     except socket.timeout:
-        raise Exception(f"Connection timeout to FTP server {ip}:{port}")
+        print(f"Connection timeout to FTP server {ip}:{port}")
+        return None
     except socket.error as e:
-        raise Exception(f"Socket error: {e}")
-    ftp_ctrl = receive_response(ctrl_sock)
+        print(f"Socket error: {e}")
+        return None
+    ftp_ctrl = side_function.receive_response(ctrl_sock)
     if not ftp_ctrl.startswith('220'):
-        raise Exception(f"Failed to connect: {ftp_ctrl}")
+        print(f"Failed to connect: {ftp_ctrl}")
+        return None
     if ftpconfig.use_ssl:
-        ftp_ctrl = send_command(ctrl_sock, f"AUTH TLS")
+        ftp_ctrl = side_function.send_command(ctrl_sock, f"AUTH TLS")
         if not ftp_ctrl.startswith('234'):
-            raise Exception(f"Failed to start TLS: {ftp_ctrl}")
+            print(f"Failed to start TLS: {ftp_ctrl}")
+            return None
         ctrl_sock = context.wrap_socket(ctrl_sock, server_hostname=ftpconfig.host)
-        ftp_ctrl = send_command(ctrl_sock, "PBSZ 0")
+        ftp_ctrl = side_function.send_command(ctrl_sock, "PBSZ 0")
         if not ftp_ctrl.startswith('200'):
-            raise Exception(f"Failed to set protection buffer size: {ftp_ctrl}")
-        ftp_ctrl = send_command(ctrl_sock, "PROT P")
+            print(f"Failed to set protection buffer size: {ftp_ctrl}")
+            return None
+        ftp_ctrl = side_function.send_command(ctrl_sock, "PROT P")
         if not ftp_ctrl.startswith('200'):
-            raise Exception(f"Failed to set data channel protection: {ftp_ctrl}")
-    ftp_ctrl = send_command(ctrl_sock, f"USER {user}")
+            print(f"Failed to set data channel protection: {ftp_ctrl}")
+            return None
+    ftp_ctrl = side_function.send_command(ctrl_sock, f"USER {user}")
     if not ftp_ctrl.startswith('331'):
-        raise Exception(f"User authentication failed: {ftp_ctrl}")
-    ftp_ctrl = send_command(ctrl_sock, f"PASS {password}")
+        print(f"User authentication failed: {ftp_ctrl}")
+        return None
+    ftp_ctrl = side_function.send_command(ctrl_sock, f"PASS {password}")
     if not ftp_ctrl.startswith('230'):
-        raise Exception(f"Password authentication failed: {ftp_ctrl}")
+        print(f"Password authentication failed: {ftp_ctrl}")
+        return None
     return ctrl_sock
 
 def create_data_socket_active(control_socket: socket.socket, command: str) -> socket.socket:
@@ -120,14 +128,16 @@ def create_data_socket_active(control_socket: socket.socket, command: str) -> so
         ip = control_socket.getsockname()[0]
         port = listen_sock.getsockname()[1]
         port_cmd = f"PORT {ip.replace('.', ',')},{port // 256},{port % 256}"
-        
-        response = send_command(control_socket, port_cmd)
-        if not response.startswith('200'):
-            raise Exception(f"Failed to set PORT mode: {response}")
 
-        response = send_command(control_socket, command)
+        response = side_function.send_command(control_socket, port_cmd)
+        if not response.startswith('200'):
+            print(f"Failed to set PORT mode: {response}")
+            return None
+
+        response = side_function.send_command(control_socket, command)
         if not response.startswith('150') and not response.startswith('125'):
-            raise Exception(f"Failed to retrieve file: {response}")
+            print(f"Failed to retrieve file: {response}")
+            return None
 
         data_sock, addr = listen_sock.accept()
         data_sock.settimeout(ftpconfig.timeout)
@@ -144,30 +154,33 @@ def create_data_socket_active(control_socket: socket.socket, command: str) -> so
             listen_sock.close()
         if data_sock:
             data_sock.close()
-        raise Exception("Active data connection timeout")
+        print("Active data connection timeout")
+        return None
     except socket.error as e:
         print(f"[Client] Socket error in active mode: {e}")
         if listen_sock:
             listen_sock.close()
         if data_sock:
             data_sock.close()
-        raise Exception(f"Active data connection failed: {e}")
+        print(f"Active data connection failed: {e}")
+        return None
     except Exception as e:
-        print(f"[Client] Error creating active data connection: {e}")
         if listen_sock:
             listen_sock.close()
         if data_sock:
             data_sock.close()
-        raise
+        print(f"[Client] Error creating active data connection: {e}")
+        return None
 
 def create_data_socket_passive(control_socket: socket.socket, command: str) -> socket.socket:
     data_sock = None
     try:
         control_socket.sendall(b"PASV\r\n")
-        response = receive_response(control_socket)
+        response = side_function.receive_response(control_socket)
         if not response.startswith('227'):
-            raise Exception(f"Failed to enter passive mode: {response}")
-        
+            print(f"Failed to enter passive mode: {response}")
+            return None
+
         parts = response.split('(')[1].split(')')[0].split(',')
         ip = '.'.join(parts[:4])
         port = int(parts[4]) * 256 + int(parts[5])  
@@ -178,28 +191,31 @@ def create_data_socket_passive(control_socket: socket.socket, command: str) -> s
         
         if ftpconfig.use_ssl:
             data_sock = context.wrap_socket(data_sock, server_hostname=control_socket.getpeername()[0], session=control_socket.session)
-        
-        response = send_command(control_socket, command)
+
+        response = side_function.send_command(control_socket, command)
         if not response.startswith('150') and not response.startswith('125'):
-            raise Exception(f"Failed to execute command: {response}")
-            
+            print(f"Failed to execute command: {response}")
+            return None
+
         return data_sock
         
     except socket.timeout:
         print(f"[Client] Timeout while creating passive data connection")
         if data_sock:
             data_sock.close()
-        raise Exception("Passive data connection timeout")
+        print("Passive data connection timeout")
+        return None
     except socket.error as e:
         print(f"[Client] Socket error in passive mode: {e}")
         if data_sock:
             data_sock.close()
-        raise Exception(f"Passive data connection failed: {e}")
+        print(f"Passive data connection failed: {e}")
+        return None
     except Exception as e:
-        print(f"[Client] Error creating passive data connection: {e}")
         if data_sock:
             data_sock.close()
-        raise
+        print(f"[Client] Error creating passive data connection: {e}")
+        return None
 
 def open_control_connection(ip: str = ftpconfig.host, port: int = ftpconfig.port, user: str = ftpconfig.username, password: str = ftpconfig.password) -> socket.socket:
     if ftpconfig.use_ssl:
@@ -211,7 +227,7 @@ def open_control_connection(ip: str = ftpconfig.host, port: int = ftpconfig.port
 def close_control_connection(control_socket: socket.socket):
     if control_socket:
         control_socket.sendall(b"QUIT\r\n")
-        response = receive_response(control_socket)
+        response = side_function.receive_response(control_socket)
         if not response.startswith('221'):
             print(f"Failed to close control connection: {response}")
         control_socket.close()

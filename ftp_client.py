@@ -59,7 +59,7 @@ def main():
                         elif change == 1:
                             os.system("cls" if os.name == "nt" else "clear")
                             path = input("Enter path to list files: ")
-                            print(command.ls(control_socket, path))
+                            side_function.print_formatted_list(command.ls(control_socket, path))
                             os.system("pause")
                         elif change == 2:
                             os.system("cls" if os.name == "nt" else "clear")
@@ -68,7 +68,8 @@ def main():
                             os.system("pause")
                         elif change == 3:
                             os.system("cls" if os.name == "nt" else "clear")
-                            print(f"Current directory: {command.pwd(control_socket)}")
+                            print(f"Remote Directory: {command.pwd(control_socket)}")
+                            print(f"Local Directory: {os.getcwd()}")
                             os.system("pause")
                         elif change == 4:
                             os.system("cls" if os.name == "nt" else "clear")

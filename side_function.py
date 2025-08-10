@@ -31,6 +31,38 @@ def progress_bar(current: int, total: int, length: int = 50) -> None:
     if current == total:
         print()
 
+def format_size(size_in_bytes: int) -> str:
+    if size_in_bytes < 1024:
+        return f"{size_in_bytes} B"
+    elif size_in_bytes < 1024**2:
+        return f"{size_in_bytes/1024:.1f} KB"
+    elif size_in_bytes < 1024**3:
+        return f"{size_in_bytes/1024**2:.1f} MB"
+    else:
+        return f"{size_in_bytes/1024**3:.1f} GB"
+
+def print_formatted_list(list_file: str):
+    print(f"{'Type':<6} {'Name':<14} {'Last Modified':<14} {'Size':>8}")
+    print("---------------------------------------------")
+    lines = list_file.splitlines()
+    for line in lines:
+        parts = line.split()
+        size_str = parts[4]
+        month = parts[5]
+        day = parts[6]
+        time_or_year = parts[7]
+        name = parts[8]
+
+        if line.startswith('d'):
+            item_type = "<DIR>"
+            formatted_size = ""
+        else:
+            item_type = ""
+            formatted_size = format_size(int(size_str))
+
+        date_str = f"{month} {day} {time_or_year}"
+        print(f"{item_type:<6} {name:<14} {date_str:<14} {formatted_size:>8}")
+
 def help_for_ls() -> str:
     return (
         "Usage: ls [path]\n"

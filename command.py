@@ -88,10 +88,11 @@ def remove_directory_recursively(control_socket: socket.socket, path: str) -> bo
 
         if item.lower().startswith("d"):
             if not remove_directory_recursively(control_socket, name):
+                cd(control_socket, current_directory)
                 return False
         else:
             if not delete(control_socket, name):
-                print(f"[Client] Failed to delete file: {name}")
+                cd(control_socket, current_directory)
                 return False
 
     print(pwd(control_socket)) 
@@ -160,6 +161,8 @@ def get(control_socket: socket.socket, file_name: str, local_path: str = None) -
         return False
 
     file_size = side_function.size_command(control_socket, file_name)
+    if file_size is None:
+        file_size = 0
     if file_size is bool:
         print(f"[Client] Failed to get size for {file_name}")
         return False
@@ -169,20 +172,20 @@ def get(control_socket: socket.socket, file_name: str, local_path: str = None) -
     else:
         data_sock = connection.create_data_socket_active(control_socket, f"RETR {file_name}")
 
-    if file_size == 0:
-        side_function.progress_bar(0, 0)
-    else:
-        downloaded = 0
-        with open(local_path, 'wb') as f:
-            while downloaded <= file_size:
-                remaining = file_size - downloaded
-                chunk_size = min(ftpconfig.buffer_size, remaining)
-                data = data_sock.recv(chunk_size)
-                if not data:
-                    break
-                f.write(data)
-                downloaded += len(data)
-                side_function.progress_bar(downloaded, file_size)
+    downloaded = 0
+    print(f"[Client] Downloading {file_name} to {local_path} ({file_size} bytes)")
+    with open(local_path, 'wb') as f:
+        while downloaded <= file_size:
+            remaining = file_size - downloaded
+            chunk_size = min(ftpconfig.buffer_size, remaining)
+            data = data_sock.recv(chunk_size)
+            if not data:
+                break
+            f.write(data)
+            downloaded += len(data)
+            side_function.progress_bar(downloaded, file_size)
+        if file_size == 0:
+            side_function.progress_bar(0, 0)
 
     data_sock.close()
     
@@ -196,7 +199,7 @@ def get(control_socket: socket.socket, file_name: str, local_path: str = None) -
         os.remove(local_path)
         return False
     
-    print(f"[Client] File {file_name} downloaded to {local_path}")
+    print(f"[Client] File {file_name} downloaded successfully as {local_path}")
     return True
 
 def put(control_socket: socket.socket, file_name: str, remote_file_name: str = '') -> bool:
@@ -217,20 +220,20 @@ def put(control_socket: socket.socket, file_name: str, remote_file_name: str = '
         data_sock = connection.create_data_socket_active(control_socket, f"STOR {remote_file_name}")
 
     file_size = os.path.getsize(file_name)
-    if file_size == 0:
-        side_function.progress_bar(0, 0)
-    else:    
-        with open(file_name, 'rb') as f:
-            bytes_sent = 0
-            while bytes_sent <= file_size:
-                remaining = file_size - bytes_sent
-                chunk_size = min(ftpconfig.buffer_size, remaining)
-                data = f.read(chunk_size)
-                if not data:
-                    break
-                data_sock.sendall(data)
-                bytes_sent += len(data)
-                side_function.progress_bar(bytes_sent, file_size)
+    print(f"[Client] Uploading {file_name} to {remote_file_name} ({file_size} bytes)")
+    with open(file_name, 'rb') as f:
+        bytes_sent = 0
+        while bytes_sent <= file_size:
+            remaining = file_size - bytes_sent
+            chunk_size = min(ftpconfig.buffer_size, remaining)
+            data = f.read(chunk_size)
+            if not data:
+                break
+            data_sock.sendall(data)
+            bytes_sent += len(data)
+            side_function.progress_bar(bytes_sent, file_size)
+        if file_size == 0:
+            side_function.progress_bar(0, 0)
 
     if ftpconfig.use_ssl:
         data_sock.unwrap()
