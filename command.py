@@ -334,7 +334,7 @@ def status(control_socket: socket.socket) -> bool:
             return False
         peer_name = control_socket.getpeername()
         remote_dir = pwd(control_socket)
-        print("--- Session Status ---")
+        print("Session Status:")
 
         print(f"🔗 Connected to: {peer_name[0]}:{peer_name[1]}")
         
@@ -343,9 +343,8 @@ def status(control_socket: socket.socket) -> bool:
         print(f"📡 Passive Mode: {passive_status}")
         
         print(f"🖥️  Remote Directory: {remote_dir}")
-        print(f"💻 Local Directory:  {os.getcwd()}")
+        print(f"💻 Local Directory: {os.getcwd()}")
         print(f"[Client] Server status: {response}")
-        print("----------------------")
         return True
     except Exception as e:
         print(f"[Client] Error getting server status: {e}")
