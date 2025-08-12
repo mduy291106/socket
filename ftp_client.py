@@ -63,9 +63,35 @@ def main():
                             os.system("pause")
                         elif change == 2:
                             os.system("cls" if os.name == "nt" else "clear")
-                            path = input("Enter path to change directory: ")
-                            command.cd(control_socket, path)
-                            os.system("pause")
+                            a = 1
+                            while True:
+                                os.system("cls" if os.name == "nt" else "clear")
+                                print(("-> "if a == 1 else " ") + "On Server")
+                                print(("-> "if a == 2 else " ") + "On Local")
+                                print(("-> "if a == 0 else " ") + "Back to File and Directory Operations")
+                                key = msvcrt.getch()
+                                if key == b'\xe0':
+                                    key = msvcrt.getch()
+                                    if key == b'H':
+                                        a -= 1
+                                        if a < 0: a = 2
+                                    elif key == b'P':
+                                        a += 1
+                                        if a > 2: a = 0
+                                elif key == b'\r':
+                                    if a == 1:
+                                        os.system("cls" if os.name == "nt" else "clear")
+                                        path = input("Enter path to change directory on server: ")
+                                        command.cd(control_socket, path)
+                                        os.system("pause")
+                                    elif a == 2:
+                                        os.system("cls" if os.name == "nt" else "clear")
+                                        path = input("Enter path to change directory on local: ")
+                                        os.chdir(path)
+                                        print(f"Changed local directory to: {os.getcwd()}")
+                                        os.system("pause")
+                                    elif a == 0:
+                                        break
                         elif change == 3:
                             os.system("cls" if os.name == "nt" else "clear")
                             print(f"Remote Directory: {command.pwd(control_socket)}")
@@ -197,7 +223,7 @@ def main():
                             os.system("pause")
                         elif change == 3:
                             os.system("cls" if os.name == "nt" else "clear")
-                            command.transfer_passive_mode(control_socket)
+                            command.transfer_mode(control_socket)
                             os.system("pause")
                         elif change == 4:
                             os.system("cls" if os.name == "nt" else "clear")

@@ -173,7 +173,7 @@ def get(control_socket: socket.socket, file_name: str, local_path: str = None) -
         data_sock = connection.create_data_socket_active(control_socket, f"RETR {file_name}")
 
     downloaded = 0
-    print(f"[Client] Downloading {file_name} to {local_path} ({file_size} bytes)")
+    print(f"[Client] Downloading {file_name} to {local_path} ({side_function.format_size(file_size)} bytes)")
     with open(local_path, 'wb') as f:
         while downloaded <= file_size:
             remaining = file_size - downloaded
@@ -194,7 +194,7 @@ def get(control_socket: socket.socket, file_name: str, local_path: str = None) -
         print(f"RETR command failed: {response}")
         return False
         
-    if not connection.scan_for_virus(local_path):
+    if connection.scan_for_virus(local_path) != 'OK':
         print(f"[Client] File {local_path} is infected. Download aborted.")
         os.remove(local_path)
         return False
@@ -210,7 +210,7 @@ def put(control_socket: socket.socket, file_name: str, remote_file_name: str = '
     if remote_file_name == '':
         remote_file_name = os.path.basename(file_name)
 
-    if not connection.scan_for_virus(file_name):
+    if connection.scan_for_virus(file_name) != 'OK':
         print(f"[Client] File {file_name} is infected. Upload aborted.")
         return False
 
@@ -220,7 +220,7 @@ def put(control_socket: socket.socket, file_name: str, remote_file_name: str = '
         data_sock = connection.create_data_socket_active(control_socket, f"STOR {remote_file_name}")
 
     file_size = os.path.getsize(file_name)
-    print(f"[Client] Uploading {file_name} to {remote_file_name} ({file_size} bytes)")
+    print(f"[Client] Uploading {file_name} to {remote_file_name} ({side_function.format_size(file_size)} bytes)")
     with open(file_name, 'rb') as f:
         bytes_sent = 0
         while bytes_sent <= file_size:
@@ -353,17 +353,21 @@ def status(control_socket: socket.socket) -> bool:
         print(f"[Client] Error getting server status: {e}")
         return False
 
-def transfer_passive_mode(control_socket: socket.socket) -> bool:
+def transfer_mode(control_socket: socket.socket) -> bool:
     try:
-        ftpconfig.mode = FTPMode.PASSIVE
-        response = side_function.send_command(control_socket, "PASV")
-
-        if response.startswith('200') or response.startswith('227'):
-            print(f"[Client] Switched to {ftpconfig.mode} mode")
+        if ftpconfig.mode == FTPMode.PASSIVE:
+            ftpconfig.mode = FTPMode.ACTIVE
+            print(f"[Client] Switched to {ftpconfig.mode.name} mode")
             return True
         else:
-            print(f"[Client] Failed to switch to passive mode: {response.strip()}")
-            return False
+            ftpconfig.mode = FTPMode.PASSIVE
+            response = side_function.send_command(control_socket, "PASV")
+            if response.startswith('200') or response.startswith('227'):
+                print(f"[Client] Switched to {ftpconfig.mode.name} mode")
+                return True
+            else:
+                print(f"[Client] Failed to switch to passive mode: {response.strip()}")
+                return False
     except socket.error as e:
         print(f"[Client] Socket error while switching mode: {e}")
         return False

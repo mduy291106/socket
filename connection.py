@@ -8,11 +8,12 @@ import side_function
 from ftp_config import ftpconfig
 
 def scan_for_virus(file_path, server_ip=ftpconfig.clamav_host, port=ftpconfig.clamav_port):
-    subprocess.Popen(['python3', 'clamav.py'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+    process = subprocess.Popen(['python', 'clamav.py'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
     client = socket.socket()
     try:
         client.settimeout(ftpconfig.timeout)  
         client.connect((ftpconfig.clamav_host, ftpconfig.clamav_port))
+        client.settimeout(None)
     except socket.timeout:
         print(f"[Client] Connection timeout to clamav agent {server_ip}:{port}")
         client.close()
@@ -53,6 +54,7 @@ def scan_for_virus(file_path, server_ip=ftpconfig.clamav_host, port=ftpconfig.cl
     client.close()
     scanning[0] = False
     animation_thread.join(timeout=0.1)
+    process.terminate()
     return scan_result.decode('utf-8')
     
 def wait_for_scan():
