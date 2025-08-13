@@ -5,11 +5,9 @@ class FTPMode(Enum):
     ACTIVE = "active"
     PASSIVE = "passive"
 
-
 class TransferMode(Enum):
     ASCII = "A"
     BINARY = "I"
-
 
 @dataclass
 class FTPConfig:

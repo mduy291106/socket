@@ -6,7 +6,8 @@ import side_function
 
 def pwd(control_socket: socket.socket) -> str:
     try:
-        response = side_function.send_command(control_socket, "PWD")
+        control_socket.sendall(b'PWD\r\n')
+        response = control_socket.recv(ftpconfig.buffer_size).decode('utf-8', errors='ignore')
         if not response.startswith('257'):
             print(f"PWD command failed: {response}")
             return ""
@@ -16,8 +17,12 @@ def pwd(control_socket: socket.socket) -> str:
         return ""
 
 def ls(control_socket: socket.socket, directory: str = '') -> str:
+    if not (os.path.isdir(directory) or directory == ''):
+        print(f"[Client] Directory does not exist")
+        return ""
     if not pwd(control_socket):
-        return []
+        return ""
+    print(f"[Client] Current directory: {pwd(control_socket)}")
     if ftpconfig.mode == FTPMode.PASSIVE:
         data_sock = connection.create_data_socket_passive(control_socket, "LIST " + directory)
     else:
@@ -32,7 +37,7 @@ def ls(control_socket: socket.socket, directory: str = '') -> str:
         data_sock.unwrap()
     data_sock.close()
 
-    response = side_function.receive_response(control_socket)
+    response = control_socket.recv(ftpconfig.buffer_size).decode('utf-8', errors='ignore')
     if not response.startswith('226'):
         print(f"LIST command failed: {response}")
         return ""
@@ -43,7 +48,8 @@ def cd(control_socket: socket.socket, path: str) -> bool:
         print("Path cannot be empty")
         return False
     try:
-        response = side_function.send_command(control_socket, f"CWD {path}")
+        control_socket.sendall(f"CWD {path}\r\n".encode('utf-8'))
+        response = control_socket.recv(ftpconfig.buffer_size).decode('utf-8', errors='ignore')
         if not response.startswith('250'):
             print(f"CWD command failed: {response}")
             return False
@@ -59,7 +65,8 @@ def mkdir(control_socket: socket.socket, path: str) -> bool:
         print("Directory name cannot be empty")
         return False
     try:
-        response = side_function.send_command(control_socket, f'MKD {path}')
+        control_socket.sendall(f"MKD {path}\r\n".encode('utf-8'))
+        response = control_socket.recv(ftpconfig.buffer_size).decode('utf-8', errors='ignore')
         if not response.startswith('257'):
             print(f"MKD command failed: {response}")
             return False
@@ -75,7 +82,8 @@ def remove_directory_recursively(control_socket: socket.socket, path: str) -> bo
         return False
     items = ls(control_socket).splitlines()
     if items is None:
-        response = side_function.send_command(control_socket, f"RMD {path}")
+        control_socket.sendall(f"RMD {path}\r\n".encode('utf-8'))
+        response = control_socket.recv(ftpconfig.buffer_size).decode('utf-8', errors='ignore')
         if not response.startswith('250'):
             print(f"RMD command failed: {response}")
             return False
@@ -98,7 +106,8 @@ def remove_directory_recursively(control_socket: socket.socket, path: str) -> bo
     print(pwd(control_socket)) 
     cd(control_socket, current_directory)
 
-    response = side_function.send_command(control_socket, f"RMD {path}")
+    control_socket.sendall(f"RMD {path}\r\n".encode('utf-8'))
+    response = control_socket.recv(ftpconfig.buffer_size).decode('utf-8', errors='ignore')
     if not response.startswith('250'):
         print(f"RMD command failed: {response}")
         return False
@@ -122,7 +131,8 @@ def delete(control_socket: socket.socket, file_name: str) -> bool:
         print("File name cannot be empty")
         return False
     try:
-        response = side_function.send_command(control_socket, f"DELE {file_name}")
+        control_socket.sendall(f"DELE {file_name}\r\n".encode('utf-8'))
+        response = control_socket.recv(ftpconfig.buffer_size).decode('utf-8', errors='ignore')
         if not response.startswith('250'):
             print(f"DELE command failed: {response}")
             return False
@@ -137,11 +147,13 @@ def rename(control_socket: socket.socket, old_name: str, new_name: str) -> bool:
         print("Old and new file names cannot be empty")
         return False
     try:
-        response = side_function.send_command(control_socket, f"RNFR {old_name}")
+        control_socket.sendall(f"RNFR {old_name}\r\n".encode('utf-8'))
+        response = control_socket.recv(ftpconfig.buffer_size).decode('utf-8', errors='ignore')
         if not response.startswith('350'):
             print(f"RNFR command failed: {response}")
             return False
-        response = side_function.send_command(control_socket, f"RNTO {new_name}")
+        control_socket.sendall(f"RNTO {new_name}\r\n".encode('utf-8'))
+        response = control_socket.recv(ftpconfig.buffer_size).decode('utf-8', errors='ignore')
         if not response.startswith('250'):
             print(f"RNTO command failed: {response}")
             return False
@@ -151,21 +163,24 @@ def rename(control_socket: socket.socket, old_name: str, new_name: str) -> bool:
         print(f"[Client] Error renaming file: {e}")
         return False
 
-def get(control_socket: socket.socket, file_name: str, local_path: str = None) -> bool:
+def get(control_socket: socket.socket, file: str, local_path: str = None) -> bool:
+    if not file:
+        print("File name cannot be empty")
+        return False
+
+    file_name = file.strip().split()[0]
+
     if local_path is None:
         os.makedirs('downloads_from_server', exist_ok=True)
         local_path = os.path.join('downloads_from_server', file_name)
 
-    if not file_name:
-        print("File name cannot be empty")
-        return False
-
-    file_size = side_function.size_command(control_socket, file_name)
-    if file_size is None:
-        file_size = 0
-    if file_size is bool:
-        print(f"[Client] Failed to get size for {file_name}")
-        return False
+    control_socket.sendall(f"SIZE {file_name}\r\n".encode('utf-8'))
+    response = control_socket.recv(ftpconfig.buffer_size).decode('utf-8', errors='ignore')
+    if response.startswith("213"):
+        file_size = int(response.split()[1])
+        if file_size is None:
+            print(f"[Client] Failed to get size for {file_name}")
+            return False
 
     if ftpconfig.mode == FTPMode.PASSIVE:
         data_sock = connection.create_data_socket_passive(control_socket, f"RETR {file_name}")
@@ -188,8 +203,8 @@ def get(control_socket: socket.socket, file_name: str, local_path: str = None) -
             side_function.progress_bar(0, 0)
 
     data_sock.close()
-    
-    response = side_function.receive_response(control_socket)
+
+    response = control_socket.recv(ftpconfig.buffer_size).decode('utf-8', errors='ignore')
     if not response.startswith('226'):
         print(f"RETR command failed: {response}")
         return False
@@ -202,7 +217,14 @@ def get(control_socket: socket.socket, file_name: str, local_path: str = None) -
     print(f"[Client] File {file_name} downloaded successfully as {local_path}")
     return True
 
-def put(control_socket: socket.socket, file_name: str, remote_file_name: str = '') -> bool:
+def put(control_socket: socket.socket, file: str, remote_file_name: str = '') -> bool:
+    
+    if not file:
+        print("File name cannot be empty")
+        return False
+    
+    file_name = file.strip().split()[0]
+
     if not os.path.isfile(file_name):
         print(f"File {file_name} does not exist")
         return False
@@ -239,7 +261,7 @@ def put(control_socket: socket.socket, file_name: str, remote_file_name: str = '
         data_sock.unwrap()
     data_sock.close()
 
-    response = side_function.receive_response(control_socket)
+    response = control_socket.recv(ftpconfig.buffer_size).decode('utf-8', errors='ignore')
     if not response.startswith('226'):
         print(f"STOR command failed: {response}")
         return False
@@ -305,7 +327,6 @@ def mput(control_socket: socket.socket, file_names: list[str]) -> None:
     for file_name in file_names:
         put(control_socket, file_name)
 
-
 def mget(control_socket: socket.socket, file_names: list[str]) -> None:
     for file_name in file_names:
         get(control_socket, file_name)
@@ -319,7 +340,8 @@ def transfer_ascii_binary_mode(control_socket: socket.socket, mode: str) -> bool
             ftpconfig.transfer_mode = TransferMode.BINARY
         elif mode == 'A':
             ftpconfig.transfer_mode = TransferMode.ASCII
-        response = side_function.send_command(control_socket, f"TYPE {mode}")
+        control_socket.sendall(f"TYPE {mode}\r\n".encode('utf-8'))
+        response = control_socket.recv(ftpconfig.buffer_size).decode('utf-8', errors='ignore')
         if response.startswith("200"):
             print(f"[Client] Transfer mode set to {ftpconfig.transfer_mode.name}")
             return True
@@ -332,7 +354,8 @@ def transfer_ascii_binary_mode(control_socket: socket.socket, mode: str) -> bool
 
 def status(control_socket: socket.socket) -> bool:
     try:
-        response = side_function.send_command(control_socket, "STAT")
+        control_socket.sendall(b"STAT\r\n")
+        response = control_socket.recv(ftpconfig.buffer_size).decode('utf-8', errors='ignore')
         if not response.startswith('211'):
             print(f"STAT command failed: {response}")
             return False
@@ -361,7 +384,8 @@ def transfer_mode(control_socket: socket.socket) -> bool:
             return True
         else:
             ftpconfig.mode = FTPMode.PASSIVE
-            response = side_function.send_command(control_socket, "PASV")
+            control_socket.sendall(b"PASV\r\n")
+            response = control_socket.recv(ftpconfig.buffer_size).decode('utf-8', errors='ignore')
             if response.startswith('200') or response.startswith('227'):
                 print(f"[Client] Switched to {ftpconfig.mode.name} mode")
                 return True
@@ -372,8 +396,11 @@ def transfer_mode(control_socket: socket.socket) -> bool:
         print(f"[Client] Socket error while switching mode: {e}")
         return False
     
-def directory_put(control_socket: socket.socket, local_path: str, remote_path: str = None) -> bool:
-    if not os.path.isdir(local_path):
+def directory_put(control_socket: socket.socket, local_path: str = '', remote_path: str = None) -> bool:
+    if local_path == '':
+        local_path = os.getcwd()
+
+    if not (os.path.isdir(local_path)):
         print(f"[Client] Local path {local_path} is not a directory")
         return False
     

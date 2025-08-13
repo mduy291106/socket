@@ -36,7 +36,7 @@ def main():
                     os.system("cls" if os.name == "nt" else "clear")
                     print("File and Directory Operations:")
                     print(("-> "if change == 1 else " ") + "1. List files and folders on the FTP server")
-                    print(("-> "if change == 2 else " ") + "2. Change directory on the FTP server")
+                    print(("-> "if change == 2 else " ") + "2. Change directory (on server or local)")
                     print(("-> "if change == 3 else " ") + "3. Show the current directory on the FTP server")
                     print(("-> "if change == 4 else " ") + "4. Create folders on the FTP server")
                     print(("-> "if change == 5 else " ") + "5. Delete folders on the FTP server")
@@ -87,6 +87,10 @@ def main():
                                     elif a == 2:
                                         os.system("cls" if os.name == "nt" else "clear")
                                         path = input("Enter path to change directory on local: ")
+                                        if not os.path.isdir(path):
+                                            print(f"[Client] Directory does not exist: {path}")
+                                            os.system("pause")
+                                            continue
                                         os.chdir(path)
                                         print(f"Changed local directory to: {os.getcwd()}")
                                         os.system("pause")
@@ -247,6 +251,8 @@ def main():
                             os.system("cls" if os.name == "nt" else "clear")
                             check = input("Are you sure you want to exit? (y/n): ").strip().lower()
                             if check == 'y':
+                                os.system("cls" if os.name == "nt" else "clear")
+                                print("Thank you for using the FTP client!")
                                 exit(0)
                             else:
                                 print("Exit cancelled.")
@@ -365,8 +371,9 @@ def main():
                                         os.system("cls" if os.name == "nt" else "clear")
                                         print(side_function.help_for_quit())
                                         os.system("pause")
-            elif choice == 0:   
-                print("Thank you!")
+            elif choice == 0:
+                os.system("cls" if os.name == "nt" else "clear")
+                print("Thank you for using the FTP client!")
                 break
             
 if __name__ == "__main__":

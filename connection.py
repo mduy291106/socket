@@ -4,7 +4,6 @@ import subprocess
 import os
 import time
 import threading
-import side_function
 from ftp_config import ftpconfig
 
 def scan_for_virus(file_path, server_ip=ftpconfig.clamav_host, port=ftpconfig.clamav_port):
@@ -90,32 +89,45 @@ def create_control_socket(ip: str = ftpconfig.host, port: int = ftpconfig.port, 
     except socket.error as e:
         print(f"Socket error: {e}")
         return None
-    ftp_ctrl = side_function.receive_response(ctrl_sock)
+    
+    ftp_ctrl = ctrl_sock.recv(ftpconfig.buffer_size).decode('utf-8', errors='ignore')
+
     if not ftp_ctrl.startswith('220'):
         print(f"Failed to connect: {ftp_ctrl}")
         return None
+    
     if ftpconfig.use_ssl:
-        ftp_ctrl = side_function.send_command(ctrl_sock, f"AUTH TLS")
-        if not ftp_ctrl.startswith('234'):
-            print(f"Failed to start TLS: {ftp_ctrl}")
+        ctrl_sock.sendall(b"AUTH TLS\r\n")
+        response = ctrl_sock.recv(ftpconfig.buffer_size).decode('utf-8', errors='ignore')
+        if not response.startswith('234'):
+            print(f"Failed to start TLS: {response}")
             return None
+        
         ctrl_sock = context.wrap_socket(ctrl_sock, server_hostname=ftpconfig.host)
-        ftp_ctrl = side_function.send_command(ctrl_sock, "PBSZ 0")
-        if not ftp_ctrl.startswith('200'):
-            print(f"Failed to set protection buffer size: {ftp_ctrl}")
+        ctrl_sock.sendall(b"PBSZ 0\r\n")
+        response = ctrl_sock.recv(ftpconfig.buffer_size).decode('utf-8', errors='ignore')
+        if not response.startswith('200'):
+            print(f"Failed to set protection buffer size: {response}")
             return None
-        ftp_ctrl = side_function.send_command(ctrl_sock, "PROT P")
-        if not ftp_ctrl.startswith('200'):
-            print(f"Failed to set data channel protection: {ftp_ctrl}")
+        
+        ctrl_sock.sendall(b"PROT P\r\n")
+        response = ctrl_sock.recv(ftpconfig.buffer_size).decode('utf-8', errors='ignore')
+        if not response.startswith('200'):
+            print(f"Failed to set data channel protection: {response}")
             return None
-    ftp_ctrl = side_function.send_command(ctrl_sock, f"USER {user}")
-    if not ftp_ctrl.startswith('331'):
-        print(f"User authentication failed: {ftp_ctrl}")
+        
+    ctrl_sock.sendall(f"USER {user}\r\n".encode('utf-8'))
+    response = ctrl_sock.recv(ftpconfig.buffer_size).decode('utf-8', errors='ignore')
+    if not response.startswith('331'):
+        print(f"User authentication failed: {response}")
         return None
-    ftp_ctrl = side_function.send_command(ctrl_sock, f"PASS {password}")
-    if not ftp_ctrl.startswith('230'):
-        print(f"Password authentication failed: {ftp_ctrl}")
+    
+    ctrl_sock.sendall(f"PASS {password}\r\n".encode('utf-8'))
+    response = ctrl_sock.recv(ftpconfig.buffer_size).decode('utf-8', errors='ignore')
+    if not response.startswith('230'):
+        print(f"Password authentication failed: {response}")
         return None
+    
     return ctrl_sock
 
 def create_data_socket_active(control_socket: socket.socket, command: str) -> socket.socket:
@@ -131,12 +143,14 @@ def create_data_socket_active(control_socket: socket.socket, command: str) -> so
         port = listen_sock.getsockname()[1]
         port_cmd = f"PORT {ip.replace('.', ',')},{port // 256},{port % 256}"
 
-        response = side_function.send_command(control_socket, port_cmd)
+        control_socket.sendall(port_cmd.encode('utf-8') + b'\r\n')
+        response = control_socket.recv(ftpconfig.buffer_size).decode('utf-8', errors='ignore')
         if not response.startswith('200'):
             print(f"Failed to set PORT mode: {response}")
             return None
 
-        response = side_function.send_command(control_socket, command)
+        control_socket.sendall(command.encode('utf-8') + b'\r\n')
+        response = control_socket.recv(ftpconfig.buffer_size).decode('utf-8', errors='ignore')
         if not response.startswith('150') and not response.startswith('125'):
             print(f"Failed to retrieve file: {response}")
             return None
@@ -178,7 +192,7 @@ def create_data_socket_passive(control_socket: socket.socket, command: str) -> s
     data_sock = None
     try:
         control_socket.sendall(b"PASV\r\n")
-        response = side_function.receive_response(control_socket)
+        response = control_socket.recv(ftpconfig.buffer_size).decode('utf-8', errors='ignore')
         if not response.startswith('227'):
             print(f"Failed to enter passive mode: {response}")
             return None
@@ -194,7 +208,8 @@ def create_data_socket_passive(control_socket: socket.socket, command: str) -> s
         if ftpconfig.use_ssl:
             data_sock = context.wrap_socket(data_sock, server_hostname=control_socket.getpeername()[0], session=control_socket.session)
 
-        response = side_function.send_command(control_socket, command)
+        control_socket.sendall(command.encode('utf-8') + b'\r\n')
+        response = control_socket.recv(ftpconfig.buffer_size).decode('utf-8', errors='ignore')
         if not response.startswith('150') and not response.startswith('125'):
             print(f"Failed to execute command: {response}")
             return None
@@ -229,7 +244,7 @@ def open_control_connection(ip: str = ftpconfig.host, port: int = ftpconfig.port
 def close_control_connection(control_socket: socket.socket):
     if control_socket:
         control_socket.sendall(b"QUIT\r\n")
-        response = side_function.receive_response(control_socket)
+        response = control_socket.recv(ftpconfig.buffer_size).decode('utf-8', errors='ignore')
         if not response.startswith('221'):
             print(f"Failed to close control connection: {response}")
         control_socket.close()
