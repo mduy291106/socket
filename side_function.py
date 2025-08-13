@@ -44,110 +44,110 @@ def help_for_ls() -> str:
     return (
         "Usage: ls [path]\n"
         "List files in the specified directory. If no path is provided, lists files in the current directory.\n"
-        "Example: ls /home/user/documents\n"
+        "Example: ls /home/user/documents"
     )
 
 def help_for_cd() -> str:
     return (
         "Usage: cd [path]\n"
         "Change the current directory to the specified path.\n"
-        "Example: cd /home/user/documents\n"
+        "Example: cd /home/user/documents"
     )
 
 def help_for_pwd() -> str:
     return (
         "Usage: pwd\n"
-        "Print the current working directory on the FTP server.\n"
+        "Print the current working directory on the FTP server."
     )
 
 def help_for_mkdir() -> str:
     return (
         "Usage: mkdir [path]\n"
         "Create a new directory at the specified path on the FTP server.\n"
-        "Example: mkdir /home/user/new_folder\n"
+        "Example: mkdir /home/user/new_folder"
     )
 
 def help_for_rmdir() -> str:
     return (
         "Usage: rmdir [path]\n"
         "Remove the directory at the specified path on the FTP server.\n"
-        "Example: rmdir /home/user/old_folder\n"
+        "Example: rmdir /home/user/old_folder"
     )
 
 def help_for_delete() -> str:
     return (
         "Usage: delete [file]\n"
         "Delete the specified file on the FTP server.\n"
-        "Example: delete /home/user/file.txt\n"
+        "Example: delete /home/user/file.txt"
     )
 
 def help_for_rename() -> str:
     return (
         "Usage: rename [old_name] [new_name]\n"
         "Rename a file on the FTP server.\n"
-        "Example: rename /home/user/old.txt /home/user/new.txt\n"
+        "Example: rename /home/user/old.txt /home/user/new.txt"
     )
 
 def help_for_get() -> str:
     return (
         "Usage: get [file]\n"
         "Download the specified file from the FTP server.\n"
-        "Example: get /home/user/file.txt\n"
+        "Example: get /home/user/file.txt"
     )
 
 def help_for_put() -> str:
     return (
         "Usage: put [file]\n"
         "Upload the specified file to the FTP server.\n"
-        "Example: put /home/user/file.txt\n"
+        "Example: put /home/user/file.txt"
     )
 
 def help_for_mget() -> str:
     return (
         "Usage: mget [file1 file2 ...]\n or mget [*.txt]\n"
         "Download multiple files from the FTP server.\n"
-        "Example: mget /home/user/file1.txt /home/user/file2.txt\n"
+        "Example: mget /home/user/file1.txt /home/user/file2.txt"
     )
 
 def help_for_mput() -> str:
     return (
         "Usage: mput [file1 file2 ...]\n or mput [*.txt]\n"
         "Upload multiple files to the FTP server.\n"
-        "Example: mput /home/user/file1.txt /home/user/file2.txt\n"
+        "Example: mput /home/user/file1.txt /home/user/file2.txt"
     )
 
 def help_for_dput() -> str:
     return (
         "Usage: dput [directory]\n"
         "Upload a directory to the FTP server.\n"
-        "Example: dput /home/user/my_folder\n"
+        "Example: dput /home/user/my_folder"
     )
 
 def help_for_dget() -> str:
     return (
         "Usage: dget [directory]\n"
         "Download a directory from the FTP server.\n"
-        "Example: dget /home/user/my_folder\n"
+        "Example: dget /home/user/my_folder"
     )
 
 def help_for_transfer_mode() -> str:
     return (
         "Usage: ascii or binary\n"
         "Set the transfer mode to ASCII or binary.\n"
-        "Example: ascii\n"
+        "Example: ascii"
     )
 
 def help_for_status() -> str:
     return (
         "Usage: status\n"
-        "Show the current status of the FTP connection, including server response and current directory.\n"
+        "Show the current status of the FTP connection, including server response and current directory."
     )
 
 def help_for_passive() -> str:
     return (
         "Usage: passive\n"
         "Switch the FTP connection to passive mode.\n"
-        "In passive mode, the client initiates the data connection.\n"
+        "In passive mode, the client initiates the data connection."
     )
 
 def help_for_connect() -> str:
@@ -158,7 +158,7 @@ def help_for_connect() -> str:
         "Input: IP address and port number of the FTP server.\n"
         "If no host or port is provided, it uses the default values from the configuration.\n"
         "Input: Username and password for authentication (if required).\n"
-        "if no username or password is provided, it uses the default values from the configuration.\n"
+        "if no username or password is provided, it uses the default values from the configuration."
     )
 
 def help_for_disconnect() -> str:
@@ -166,11 +166,11 @@ def help_for_disconnect() -> str:
         "Usage: disconnect\n"
         "Disconnect from the current FTP server.\n"
         "This command closes the control connection and any data connections.\n"
-        "If you are not connected to any server, it will simply return without action.\n"
+        "If you are not connected to any server, it will simply return without action."
     )
 
 def help_for_quit() -> str:
     return (
         "Usage: quit\n"
-        "Exit the FTP client.\n"
+        "Exit the FTP client."
     )
