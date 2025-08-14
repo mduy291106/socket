@@ -28,8 +28,8 @@ def main():
         print(f"[ClamAV Agent] Successfully started on {ftpconfig.clamav_host}:{ftpconfig.clamav_port}")
 
         try:
-            connection, addr = server_socket.accept()
-            print(f"[ClamAV Agent] Connection from {addr}")
+            connection, address = server_socket.accept()
+            print(f"[ClamAV Agent] Connection from {address}")
             with connection:
                 filename_size = int.from_bytes(connection.recv(4), 'big')
                 filename = connection.recv(filename_size).decode('utf-8')

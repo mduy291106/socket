@@ -24,18 +24,18 @@ def ls(control_socket: socket.socket, directory: str = '') -> str:
         return ""
     print(f"[Client] Current directory: {pwd(control_socket)}")
     if ftpconfig.mode == FTPMode.PASSIVE:
-        data_sock = connection.create_data_socket_passive(control_socket, "LIST " + directory)
+        data_socket = connection.create_data_socket_passive(control_socket, "LIST " + directory)
     else:
-        data_sock = connection.create_data_socket_active(control_socket, "LIST " + directory)
+        data_socket = connection.create_data_socket_active(control_socket, "LIST " + directory)
     data = b""
     while True:
-        chunk = data_sock.recv(ftpconfig.buffer_size)
+        chunk = data_socket.recv(ftpconfig.buffer_size)
         if not chunk:
             break
         data += chunk
     if ftpconfig.use_ssl:
-        data_sock.unwrap()
-    data_sock.close()
+        data_socket.unwrap()
+    data_socket.close()
 
     response = control_socket.recv(ftpconfig.buffer_size).decode('utf-8', errors='ignore')
     if not response.startswith('226'):
@@ -183,9 +183,9 @@ def get(control_socket: socket.socket, file: str, local_path: str = None) -> boo
             return False
 
     if ftpconfig.mode == FTPMode.PASSIVE:
-        data_sock = connection.create_data_socket_passive(control_socket, f"RETR {file_name}")
+        data_socket = connection.create_data_socket_passive(control_socket, f"RETR {file_name}")
     else:
-        data_sock = connection.create_data_socket_active(control_socket, f"RETR {file_name}")
+        data_socket = connection.create_data_socket_active(control_socket, f"RETR {file_name}")
 
     downloaded = 0
     print(f"[Client] Downloading {file_name} to {local_path} ({side_function.format_size(file_size)} bytes)")
@@ -193,7 +193,7 @@ def get(control_socket: socket.socket, file: str, local_path: str = None) -> boo
         while downloaded <= file_size:
             remaining = file_size - downloaded
             chunk_size = min(ftpconfig.buffer_size, remaining)
-            data = data_sock.recv(chunk_size)
+            data = data_socket.recv(chunk_size)
             if not data:
                 break
             f.write(data)
@@ -202,7 +202,7 @@ def get(control_socket: socket.socket, file: str, local_path: str = None) -> boo
         if file_size == 0:
             side_function.progress_bar(0, 0)
 
-    data_sock.close()
+    data_socket.close()
 
     response = control_socket.recv(ftpconfig.buffer_size).decode('utf-8', errors='ignore')
     if not response.startswith('226'):
@@ -237,9 +237,9 @@ def put(control_socket: socket.socket, file: str, remote_file_name: str = '') ->
         return False
 
     if ftpconfig.mode == FTPMode.PASSIVE:
-        data_sock = connection.create_data_socket_passive(control_socket, f"STOR {remote_file_name}")
+        data_socket = connection.create_data_socket_passive(control_socket, f"STOR {remote_file_name}")
     else:
-        data_sock = connection.create_data_socket_active(control_socket, f"STOR {remote_file_name}")
+        data_socket = connection.create_data_socket_active(control_socket, f"STOR {remote_file_name}")
 
     file_size = os.path.getsize(file_name)
     print(f"[Client] Uploading {file_name} to {remote_file_name} ({side_function.format_size(file_size)} bytes)")
@@ -251,15 +251,15 @@ def put(control_socket: socket.socket, file: str, remote_file_name: str = '') ->
             data = f.read(chunk_size)
             if not data:
                 break
-            data_sock.sendall(data)
+            data_socket.sendall(data)
             bytes_sent += len(data)
             side_function.progress_bar(bytes_sent, file_size)
         if file_size == 0:
             side_function.progress_bar(0, 0)
 
     if ftpconfig.use_ssl:
-        data_sock.unwrap()
-    data_sock.close()
+        data_socket.unwrap()
+    data_socket.close()
 
     response = control_socket.recv(ftpconfig.buffer_size).decode('utf-8', errors='ignore')
     if not response.startswith('226'):
