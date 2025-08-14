@@ -22,5 +22,6 @@ class FTPConfig:
     timeout: int = 20
     mode: FTPMode = FTPMode.ACTIVE
     transfer_mode: TransferMode = TransferMode.ASCII
+    is_quit: bool = False
 
 ftpconfig = FTPConfig()

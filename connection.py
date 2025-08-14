@@ -116,6 +116,8 @@ def create_control_socket(ip: str = ftpconfig.host, port: int = ftpconfig.port, 
             print(f"Failed to set data channel protection: {response}")
             return None
         
+        ftpconfig.is_quit = False
+        
     control_socket.sendall(f"USER {user}\r\n".encode('utf-8'))
     response = control_socket.recv(ftpconfig.buffer_size).decode('utf-8', errors='ignore')
     if not response.startswith('331'):
@@ -248,4 +250,5 @@ def close_control_connection(control_socket: socket.socket):
         if not response.startswith('221'):
             print(f"Failed to close control connection: {response}")
         control_socket.close()
+        ftpconfig.is_quit = True
         print("[Client] Control connection closed.")

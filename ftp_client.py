@@ -58,7 +58,7 @@ def main():
                             break
                         elif change == 1:
                             os.system("cls" if os.name == "nt" else "clear")
-                            if not control_socket:
+                            if ftpconfig.is_quit:
                                 print("[Client] No connection to FTP server")
                                 os.system("pause")
                                 continue
@@ -67,7 +67,7 @@ def main():
                             os.system("pause")
                         elif change == 2:
                             os.system("cls" if os.name == "nt" else "clear")
-                            if not control_socket:
+                            if ftpconfig.is_quit:
                                 print("[Client] No connection to FTP server")
                                 os.system("pause")
                                 continue
@@ -106,7 +106,7 @@ def main():
                                         break
                         elif change == 3:
                             os.system("cls" if os.name == "nt" else "clear")
-                            if not control_socket:
+                            if ftpconfig.is_quit:
                                 print("[Client] No connection to FTP server")
                                 os.system("pause")
                                 continue
@@ -115,7 +115,7 @@ def main():
                             os.system("pause")
                         elif change == 4:
                             os.system("cls" if os.name == "nt" else "clear")
-                            if not control_socket:
+                            if ftpconfig.is_quit:
                                 print("[Client] No connection to FTP server")
                                 os.system("pause")
                                 continue
@@ -124,7 +124,7 @@ def main():
                             os.system("pause")
                         elif change == 5:
                             os.system("cls" if os.name == "nt" else "clear")
-                            if not control_socket:
+                            if ftpconfig.is_quit:
                                 print("[Client] No connection to FTP server")
                                 os.system("pause")
                                 continue
@@ -133,7 +133,7 @@ def main():
                             os.system("pause")
                         elif change == 6:
                             os.system("cls" if os.name == "nt" else "clear")
-                            if not control_socket:
+                            if ftpconfig.is_quit:
                                 print("[Client] No connection to FTP server")
                                 os.system("pause")
                                 continue
@@ -142,7 +142,7 @@ def main():
                             os.system("pause")
                         elif change == 7:
                             os.system("cls" if os.name == "nt" else "clear")
-                            if not control_socket:
+                            if ftpconfig.is_quit:
                                 print("[Client] No connection to FTP server")
                                 os.system("pause")
                                 continue
@@ -177,7 +177,7 @@ def main():
                             break
                         elif change == 1:
                             os.system("cls" if os.name == "nt" else "clear")
-                            if not control_socket:
+                            if ftpconfig.is_quit:
                                 print("[Client] No connection to FTP server")
                                 os.system("pause")
                                 continue
@@ -186,7 +186,7 @@ def main():
                             os.system("pause")
                         elif change == 2:
                             os.system("cls" if os.name == "nt" else "clear")
-                            if not control_socket:
+                            if ftpconfig.is_quit:
                                 print("[Client] No connection to FTP server")
                                 os.system("pause")
                                 continue
@@ -195,7 +195,7 @@ def main():
                             os.system("pause")
                         elif change == 3:
                             os.system("cls" if os.name == "nt" else "clear")
-                            if not control_socket:
+                            if ftpconfig.is_quit:
                                 print("[Client] No connection to FTP server")
                                 os.system("pause")
                                 continue
@@ -209,7 +209,7 @@ def main():
                             os.system("pause")
                         elif change == 4:
                             os.system("cls" if os.name == "nt" else "clear")
-                            if not control_socket:
+                            if ftpconfig.is_quit:
                                 print("[Client] No connection to FTP server")
                                 os.system("pause")
                                 continue
@@ -223,7 +223,7 @@ def main():
                             os.system("pause")
                         elif change == 5:
                             os.system("cls" if os.name == "nt" else "clear")
-                            if not control_socket:
+                            if ftpconfig.is_quit:
                                 print("[Client] No connection to FTP server")
                                 os.system("pause")
                                 continue
@@ -232,7 +232,7 @@ def main():
                             os.system("pause")
                         elif change == 6:
                             os.system("cls" if os.name == "nt" else "clear")
-                            if not control_socket:
+                            if ftpconfig.is_quit:
                                 print("[Client] No connection to FTP server")
                                 os.system("pause")
                                 continue
@@ -267,7 +267,7 @@ def main():
                             break
                         elif change == 1:
                             os.system("cls" if os.name == "nt" else "clear")
-                            if not control_socket:
+                            if ftpconfig.is_quit:
                                 print("[Client] No connection to FTP server")
                                 os.system("pause")
                                 continue
@@ -279,7 +279,7 @@ def main():
                             os.system("pause")
                         elif change == 2:
                             os.system("cls" if os.name == "nt" else "clear")
-                            if not control_socket:
+                            if ftpconfig.is_quit:
                                 print("[Client] No connection to FTP server")
                                 os.system("pause")
                                 continue
@@ -287,7 +287,7 @@ def main():
                             os.system("pause")
                         elif change == 3:
                             os.system("cls" if os.name == "nt" else "clear")
-                            if not control_socket:
+                            if ftpconfig.is_quit:
                                 print("[Client] No connection to FTP server")
                                 os.system("pause")
                                 continue
@@ -304,7 +304,7 @@ def main():
                             os.system("pause")
                         elif change == 5:
                             os.system("cls" if os.name == "nt" else "clear")
-                            if not control_socket:
+                            if ftpconfig.is_quit:
                                 print("[Client] No connection to FTP server")
                                 os.system("pause")
                                 continue
