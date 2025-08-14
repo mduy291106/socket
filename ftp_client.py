@@ -58,11 +58,19 @@ def main():
                             break
                         elif change == 1:
                             os.system("cls" if os.name == "nt" else "clear")
+                            if not control_socket:
+                                print("[Client] No connection to FTP server")
+                                os.system("pause")
+                                continue
                             path = input("Enter path to list files: ")
                             side_function.print_formatted_list(command.ls(control_socket, path))
                             os.system("pause")
                         elif change == 2:
                             os.system("cls" if os.name == "nt" else "clear")
+                            if not control_socket:
+                                print("[Client] No connection to FTP server")
+                                os.system("pause")
+                                continue
                             a = 1
                             while True:
                                 os.system("cls" if os.name == "nt" else "clear")
@@ -98,26 +106,46 @@ def main():
                                         break
                         elif change == 3:
                             os.system("cls" if os.name == "nt" else "clear")
+                            if not control_socket:
+                                print("[Client] No connection to FTP server")
+                                os.system("pause")
+                                continue
                             print(f"Remote Directory: {command.pwd(control_socket)}")
                             print(f"Local Directory: {os.getcwd()}")
                             os.system("pause")
                         elif change == 4:
                             os.system("cls" if os.name == "nt" else "clear")
+                            if not control_socket:
+                                print("[Client] No connection to FTP server")
+                                os.system("pause")
+                                continue
                             path = input("Enter path to create directory: ")
                             command.mkdir(control_socket, path)
                             os.system("pause")
                         elif change == 5:
                             os.system("cls" if os.name == "nt" else "clear")
+                            if not control_socket:
+                                print("[Client] No connection to FTP server")
+                                os.system("pause")
+                                continue
                             path = input("Enter path to remove directory: ")
                             command.rmdir(control_socket, path)
                             os.system("pause")
                         elif change == 6:
                             os.system("cls" if os.name == "nt" else "clear")
+                            if not control_socket:
+                                print("[Client] No connection to FTP server")
+                                os.system("pause")
+                                continue
                             file = input("Enter file to delete: ")
                             command.delete(control_socket, file)
                             os.system("pause")
                         elif change == 7:
                             os.system("cls" if os.name == "nt" else "clear")
+                            if not control_socket:
+                                print("[Client] No connection to FTP server")
+                                os.system("pause")
+                                continue
                             old_name = input("Enter old file name: ")
                             new_name = input("Enter new file name: ")
                             command.rename(control_socket, old_name, new_name)
@@ -149,16 +177,28 @@ def main():
                             break
                         elif change == 1:
                             os.system("cls" if os.name == "nt" else "clear")
+                            if not control_socket:
+                                print("[Client] No connection to FTP server")
+                                os.system("pause")
+                                continue
                             file = input("Enter file to download: ")
                             command.get(control_socket, file)
                             os.system("pause")
                         elif change == 2:
                             os.system("cls" if os.name == "nt" else "clear")
+                            if not control_socket:
+                                print("[Client] No connection to FTP server")
+                                os.system("pause")
+                                continue
                             file = input("Enter file to upload: ")
                             command.put(control_socket, file)
                             os.system("pause")
                         elif change == 3:
                             os.system("cls" if os.name == "nt" else "clear")
+                            if not control_socket:
+                                print("[Client] No connection to FTP server")
+                                os.system("pause")
+                                continue
                             files = input("Enter files to download (space-separated): ")
                             file_list = command.prompt(control_socket, files, 'mget')
                             check = input("Do you want to download these files? (y/n): ").strip().lower()
@@ -169,6 +209,10 @@ def main():
                             os.system("pause")
                         elif change == 4:
                             os.system("cls" if os.name == "nt" else "clear")
+                            if not control_socket:
+                                print("[Client] No connection to FTP server")
+                                os.system("pause")
+                                continue
                             files = input("Enter files to upload (space-separated): ")
                             file_list = command.prompt(control_socket, files, 'mput')
                             check = input("Do you want to upload these files? (y/n): ").strip().lower()
@@ -179,11 +223,19 @@ def main():
                             os.system("pause")
                         elif change == 5:
                             os.system("cls" if os.name == "nt" else "clear")
+                            if not control_socket:
+                                print("[Client] No connection to FTP server")
+                                os.system("pause")
+                                continue
                             directory = input("Enter directory to download: ")
                             command.directory_get(control_socket, directory)
                             os.system("pause")
                         elif change == 6:
                             os.system("cls" if os.name == "nt" else "clear")
+                            if not control_socket:
+                                print("[Client] No connection to FTP server")
+                                os.system("pause")
+                                continue
                             directory = input("Enter directory to upload: ")
                             command.directory_put(control_socket, directory)
                             os.system("pause")
@@ -215,6 +267,10 @@ def main():
                             break
                         elif change == 1:
                             os.system("cls" if os.name == "nt" else "clear")
+                            if not control_socket:
+                                print("[Client] No connection to FTP server")
+                                os.system("pause")
+                                continue
                             mode = input("Enter transfer mode (A for ASCII, I for Binary): ").strip().upper()
                             if mode in ["A", "I"]:
                                 command.transfer_ascii_binary_mode(control_socket, mode)
@@ -223,10 +279,18 @@ def main():
                             os.system("pause")
                         elif change == 2:
                             os.system("cls" if os.name == "nt" else "clear")
+                            if not control_socket:
+                                print("[Client] No connection to FTP server")
+                                os.system("pause")
+                                continue
                             command.status(control_socket)
                             os.system("pause")
                         elif change == 3:
                             os.system("cls" if os.name == "nt" else "clear")
+                            if not control_socket:
+                                print("[Client] No connection to FTP server")
+                                os.system("pause")
+                                continue
                             command.transfer_mode(control_socket)
                             os.system("pause")
                         elif change == 4:
@@ -240,6 +304,10 @@ def main():
                             os.system("pause")
                         elif change == 5:
                             os.system("cls" if os.name == "nt" else "clear")
+                            if not control_socket:
+                                print("[Client] No connection to FTP server")
+                                os.system("pause")
+                                continue
                             check = input("Are you sure you want to disconnect? (y/n): ").strip().lower()
                             if check == 'y':
                                 connection.close_control_connection(control_socket)

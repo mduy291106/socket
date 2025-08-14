@@ -218,7 +218,6 @@ def get(control_socket: socket.socket, file: str, local_path: str = None) -> boo
     return True
 
 def put(control_socket: socket.socket, file: str, remote_file_name: str = '') -> bool:
-    
     if not file:
         print("File name cannot be empty")
         return False
