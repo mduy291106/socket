@@ -7,7 +7,7 @@ import threading
 from ftp_config import ftpconfig
 
 def scan_for_virus(file_path, server_ip=ftpconfig.clamav_host, port=ftpconfig.clamav_port):
-    process = subprocess.Popen(['python', 'clamav.py'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+    process = subprocess.Popen(['python', 'C:\\Users\\mduy\\source\\repos\\socket\\clamav.py'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
     client = socket.socket()
     try:
         client.settimeout(ftpconfig.timeout)  

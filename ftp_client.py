@@ -6,6 +6,10 @@ from ftp_config import ftpconfig
 import side_function
 
 def main():
+    os.system("cls" if os.name == "nt" else "clear")
+    print("=" * 60)
+    print(" " * 25 + "FTP CLIENT")
+    print("=" * 60)
     ip = input("Enter FTP server IP: ") or ftpconfig.host
     port = int(input("Enter FTP server port: ") or ftpconfig.port)
     user = input("Enter username: ") or ftpconfig.username
@@ -14,7 +18,9 @@ def main():
     choice = 1
     while True:
         os.system("cls" if os.name == "nt" else "clear")
-        print("FTP Client Menu:")
+        print("=" * 60)
+        print(" " * 19 + "FTP CLIENT - MAIN MENU")
+        print("=" * 60)
         print(("🔸 " if choice == 1 else " ") + "1. File and Directory Operations")
         print(("🔸 " if choice == 2 else " ") + "2. Upload/Download")
         print(("🔸 " if choice == 3 else " ") + "3. Session Management")
