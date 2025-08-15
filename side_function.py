@@ -20,7 +20,7 @@ def format_size(size_in_bytes: int) -> str:
 
 def print_formatted_list(list_file: str):
     print(f"{'Type':<6} {'Name':<20} {'Last Modified':<16} {'Size':>10}")
-    print("-" * 58)
+    print("─" * 55)
     lines = list_file.splitlines()
     for line in lines:
         parts = line.split()
@@ -39,7 +39,7 @@ def print_formatted_list(list_file: str):
 
         date_str = f"{month} {day} {time_or_year}"
         print(f"{item_type:<6} {name:<20} {date_str:<16} {formatted_size:>10}")
-    print("-" * 58)
+    print("─" * 55)
 
 
 def help_for_ls() -> str:

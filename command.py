@@ -9,7 +9,7 @@ def pwd(control_socket: socket.socket) -> str:
         control_socket.sendall(b'PWD\r\n')
         response = control_socket.recv(ftpconfig.buffer_size).decode('utf-8', errors='ignore')
         if not response.startswith('257'):
-            print(f"PWD command failed: {response}")
+            print(f"[Client] PWD command failed: {response}")
             return ""
         return response.split('"')[1]
     except Exception as e:
@@ -39,19 +39,19 @@ def ls(control_socket: socket.socket, directory: str = '') -> str:
 
     response = control_socket.recv(ftpconfig.buffer_size).decode('utf-8', errors='ignore')
     if not response.startswith('226'):
-        print(f"LIST command failed: {response}")
+        print(f"[Client] LIST command failed: {response}")
         return ""
     return data.decode('utf-8', errors='ignore')
 
 def cd(control_socket: socket.socket, path: str) -> bool:
     if not path:
-        print("Path cannot be empty")
+        print("[Client] Path cannot be empty")
         return False
     try:
         control_socket.sendall(f"CWD {path}\r\n".encode('utf-8'))
         response = control_socket.recv(ftpconfig.buffer_size).decode('utf-8', errors='ignore')
         if not response.startswith('250'):
-            print(f"CWD command failed: {response}")
+            print(f"[Client] CWD command failed: {response}")
             return False
         current_path = pwd(control_socket)
         print(f"[Client] Changed directory to {current_path}")
@@ -62,13 +62,13 @@ def cd(control_socket: socket.socket, path: str) -> bool:
 
 def mkdir(control_socket: socket.socket, path: str) -> bool:
     if not path:
-        print("Directory name cannot be empty")
+        print("[Client] Directory name cannot be empty")
         return False
     try:
         control_socket.sendall(f"MKD {path}\r\n".encode('utf-8'))
         response = control_socket.recv(ftpconfig.buffer_size).decode('utf-8', errors='ignore')
         if not response.startswith('257'):
-            print(f"MKD command failed: {response}")
+            print(f"[Client] MKD command failed: {response}")
             return False
         print(f"[Client] Created directory {path}")
         return True
@@ -85,7 +85,7 @@ def remove_directory_recursively(control_socket: socket.socket, path: str) -> bo
         control_socket.sendall(f"RMD {path}\r\n".encode('utf-8'))
         response = control_socket.recv(ftpconfig.buffer_size).decode('utf-8', errors='ignore')
         if not response.startswith('250'):
-            print(f"RMD command failed: {response}")
+            print(f"[Client] RMD command failed: {response}")
             return False
         print(f"[Client] Removed directory {path}")
         return True
@@ -109,7 +109,7 @@ def remove_directory_recursively(control_socket: socket.socket, path: str) -> bo
     control_socket.sendall(f"RMD {path}\r\n".encode('utf-8'))
     response = control_socket.recv(ftpconfig.buffer_size).decode('utf-8', errors='ignore')
     if not response.startswith('250'):
-        print(f"RMD command failed: {response}")
+        print(f"[Client] RMD command failed: {response}")
         return False
     print(f"[Client] Removed directory {path}")
     return True
@@ -117,7 +117,7 @@ def remove_directory_recursively(control_socket: socket.socket, path: str) -> bo
 
 def rmdir(control_socket: socket.socket, path: str) -> bool:
     if not path:
-        print("Directory name cannot be empty")
+        print("[Client] Directory name cannot be empty")
         return False
     try:
         isRemoved = remove_directory_recursively(control_socket, path)
@@ -128,13 +128,13 @@ def rmdir(control_socket: socket.socket, path: str) -> bool:
     
 def delete(control_socket: socket.socket, file_name: str) -> bool:
     if not file_name:
-        print("File name cannot be empty")
+        print("[Client] File name cannot be empty")
         return False
     try:
         control_socket.sendall(f"DELE {file_name}\r\n".encode('utf-8'))
         response = control_socket.recv(ftpconfig.buffer_size).decode('utf-8', errors='ignore')
         if not response.startswith('250'):
-            print(f"DELE command failed: {response}")
+            print(f"[Client] DELE command failed: {response}")
             return False
         print(f"[Client] Deleted file {file_name}")
         return True
@@ -144,18 +144,18 @@ def delete(control_socket: socket.socket, file_name: str) -> bool:
 
 def rename(control_socket: socket.socket, old_name: str, new_name: str) -> bool:
     if not old_name or not new_name:
-        print("Old and new file names cannot be empty")
+        print("[Client] Old and new file names cannot be empty")
         return False
     try:
         control_socket.sendall(f"RNFR {old_name}\r\n".encode('utf-8'))
         response = control_socket.recv(ftpconfig.buffer_size).decode('utf-8', errors='ignore')
         if not response.startswith('350'):
-            print(f"RNFR command failed: {response}")
+            print(f"[Client] RNFR command failed: {response}")
             return False
         control_socket.sendall(f"RNTO {new_name}\r\n".encode('utf-8'))
         response = control_socket.recv(ftpconfig.buffer_size).decode('utf-8', errors='ignore')
         if not response.startswith('250'):
-            print(f"RNTO command failed: {response}")
+            print(f"[Client] RNTO command failed: {response}")
             return False
         print(f"[Client] Renamed {old_name} to {new_name}")
         return True
@@ -165,7 +165,7 @@ def rename(control_socket: socket.socket, old_name: str, new_name: str) -> bool:
 
 def get(control_socket: socket.socket, file: str, local_path: str = None) -> bool:
     if not file:
-        print("File name cannot be empty")
+        print("[Client] File name cannot be empty")
         return False
 
     file_name = file.strip().split()[0]
@@ -206,7 +206,7 @@ def get(control_socket: socket.socket, file: str, local_path: str = None) -> boo
 
     response = control_socket.recv(ftpconfig.buffer_size).decode('utf-8', errors='ignore')
     if not response.startswith('226'):
-        print(f"RETR command failed: {response}")
+        print(f"[Client] RETR command failed: {response}")
         return False
         
     if connection.scan_for_virus(local_path) != 'OK':
@@ -219,13 +219,13 @@ def get(control_socket: socket.socket, file: str, local_path: str = None) -> boo
 
 def put(control_socket: socket.socket, file: str, remote_file_name: str = '') -> bool:
     if not file:
-        print("File name cannot be empty")
+        print("[Client] File name cannot be empty")
         return False
     
     file_name = file.strip().split()[0]
 
     if not os.path.isfile(file_name):
-        print(f"File {file_name} does not exist")
+        print(f"[Client] File {file_name} does not exist")
         return False
 
     if remote_file_name == '':
@@ -262,7 +262,7 @@ def put(control_socket: socket.socket, file: str, remote_file_name: str = '') ->
 
     response = control_socket.recv(ftpconfig.buffer_size).decode('utf-8', errors='ignore')
     if not response.startswith('226'):
-        print(f"STOR command failed: {response}")
+        print(f"[Client] STOR command failed: {response}")
         return False
 
     print(f"[Client] File {file_name} uploaded successfully to server as {remote_file_name}")
@@ -356,7 +356,7 @@ def status(control_socket: socket.socket) -> bool:
         control_socket.sendall(b"STAT\r\n")
         response = control_socket.recv(ftpconfig.buffer_size).decode('utf-8', errors='ignore')
         if not response.startswith('211'):
-            print(f"STAT command failed: {response}")
+            print(f"[Client] STAT command failed: {response}")
             return False
         peer_name = control_socket.getpeername()
         remote_dir = pwd(control_socket)
@@ -369,7 +369,7 @@ def status(control_socket: socket.socket) -> bool:
             print(f"Passive Mode: ON")
         print(f"Remote Directory: {remote_dir}")
         print(f"Local Directory: {os.getcwd()}")
-        print(f"[Client] Server status: {response}")
+        print(f"Server status: {response}")
         return True
     except Exception as e:
         print(f"[Client] Error getting server status: {e}")

@@ -84,36 +84,36 @@ def create_control_socket(ip: str = ftpconfig.host, port: int = ftpconfig.port, 
         control_socket.settimeout(ftpconfig.timeout)
         control_socket.connect((ip, port))
     except socket.timeout:
-        print(f"Connection timeout to FTP server {ip}:{port}")
+        print(f"[Client] Connection timeout to FTP server {ip}:{port}")
         return None
     except socket.error as e:
-        print(f"Socket error: {e}")
+        print(f"[Client] Socket error: {e}")
         return None
     
     response = control_socket.recv(ftpconfig.buffer_size).decode('utf-8', errors='ignore')
 
     if not response.startswith('220'):
-        print(f"Failed to connect: {response}")
+        print(f"[Client] Failed to connect: {response}")
         return None
     
     if ftpconfig.use_ssl:
         control_socket.sendall(b"AUTH TLS\r\n")
         response = control_socket.recv(ftpconfig.buffer_size).decode('utf-8', errors='ignore')
         if not response.startswith('234'):
-            print(f"Failed to start TLS: {response}")
+            print(f"[Client] Failed to start TLS: {response}")
             return None
         
         control_socket = context.wrap_socket(control_socket, server_hostname=ftpconfig.host)
         control_socket.sendall(b"PBSZ 0\r\n")
         response = control_socket.recv(ftpconfig.buffer_size).decode('utf-8', errors='ignore')
         if not response.startswith('200'):
-            print(f"Failed to set protection buffer size: {response}")
+            print(f"[Client] Failed to set protection buffer size: {response}")
             return None
         
         control_socket.sendall(b"PROT P\r\n")
         response = control_socket.recv(ftpconfig.buffer_size).decode('utf-8', errors='ignore')
         if not response.startswith('200'):
-            print(f"Failed to set data channel protection: {response}")
+            print(f"[Client] Failed to set data channel protection: {response}")
             return None
         
         ftpconfig.is_quit = False
@@ -121,13 +121,13 @@ def create_control_socket(ip: str = ftpconfig.host, port: int = ftpconfig.port, 
     control_socket.sendall(f"USER {user}\r\n".encode('utf-8'))
     response = control_socket.recv(ftpconfig.buffer_size).decode('utf-8', errors='ignore')
     if not response.startswith('331'):
-        print(f"User authentication failed: {response}")
+        print(f"[Client] User authentication failed: {response}")
         return None
     
     control_socket.sendall(f"PASS {password}\r\n".encode('utf-8'))
     response = control_socket.recv(ftpconfig.buffer_size).decode('utf-8', errors='ignore')
     if not response.startswith('230'):
-        print(f"Password authentication failed: {response}")
+        print(f"[Client] Password authentication failed: {response}")
         return None
     
     return control_socket
@@ -148,13 +148,13 @@ def create_data_socket_active(control_socket: socket.socket, command: str) -> so
         control_socket.sendall(port_command.encode('utf-8') + b'\r\n')
         response = control_socket.recv(ftpconfig.buffer_size).decode('utf-8', errors='ignore')
         if not response.startswith('200'):
-            print(f"Failed to set PORT mode: {response}")
+            print(f"[Client] Failed to set PORT mode: {response}")
             return None
 
         control_socket.sendall(command.encode('utf-8') + b'\r\n')
         response = control_socket.recv(ftpconfig.buffer_size).decode('utf-8', errors='ignore')
         if not response.startswith('150') and not response.startswith('125'):
-            print(f"Failed to retrieve file: {response}")
+            print(f"[Client] Failed to retrieve file: {response}")
             return None
 
         data_socket, address = listen_socket.accept()
@@ -172,7 +172,7 @@ def create_data_socket_active(control_socket: socket.socket, command: str) -> so
             listen_socket.close()
         if data_socket:
             data_socket.close()
-        print("Active data connection timeout")
+        print("[Client] Active data connection timeout")
         return None
     except socket.error as e:
         print(f"[Client] Socket error in active mode: {e}")
@@ -180,7 +180,7 @@ def create_data_socket_active(control_socket: socket.socket, command: str) -> so
             listen_socket.close()
         if data_socket:
             data_socket.close()
-        print(f"Active data connection failed: {e}")
+        print(f"[Client] Active data connection failed: {e}")
         return None
     except Exception as e:
         if listen_socket:
@@ -196,7 +196,7 @@ def create_data_socket_passive(control_socket: socket.socket, command: str) -> s
         control_socket.sendall(b"PASV\r\n")
         response = control_socket.recv(ftpconfig.buffer_size).decode('utf-8', errors='ignore')
         if not response.startswith('227'):
-            print(f"Failed to enter passive mode: {response}")
+            print(f"[Client] Failed to enter passive mode: {response}")
             return None
 
         parts = response.split('(')[1].split(')')[0].split(',')
@@ -213,7 +213,7 @@ def create_data_socket_passive(control_socket: socket.socket, command: str) -> s
         control_socket.sendall(command.encode('utf-8') + b'\r\n')
         response = control_socket.recv(ftpconfig.buffer_size).decode('utf-8', errors='ignore')
         if not response.startswith('150') and not response.startswith('125'):
-            print(f"Failed to execute command: {response}")
+            print(f"[Client] Failed to execute command: {response}")
             return None
 
         return data_socket
@@ -222,13 +222,13 @@ def create_data_socket_passive(control_socket: socket.socket, command: str) -> s
         print(f"[Client] Timeout while creating passive data connection")
         if data_socket:
             data_socket.close()
-        print("Passive data connection timeout")
+        print("[Client] Passive data connection timeout")
         return None
     except socket.error as e:
         print(f"[Client] Socket error in passive mode: {e}")
         if data_socket:
             data_socket.close()
-        print(f"Passive data connection failed: {e}")
+        print(f"[Client] Passive data connection failed: {e}")
         return None
     except Exception as e:
         if data_socket:
@@ -248,7 +248,7 @@ def close_control_connection(control_socket: socket.socket):
         control_socket.sendall(b"QUIT\r\n")
         response = control_socket.recv(ftpconfig.buffer_size).decode('utf-8', errors='ignore')
         if not response.startswith('221'):
-            print(f"Failed to close control connection: {response}")
+            print(f"[Client] Failed to close control connection: {response}")
         control_socket.close()
         ftpconfig.is_quit = True
         print("[Client] Control connection closed.")
