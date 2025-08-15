@@ -191,7 +191,7 @@ EXAMPLES:
 
 NAMING RULES:
     • Directory names are case-sensitive on most servers
-    • Avoid special characters: < > : " | ? * \ /
+    • Avoid special characters: < > : " | ? * \\ /
     • Use quotes for names containing spaces
     • Maximum length varies by server (usually 255 characters)
 
