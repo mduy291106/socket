@@ -81,7 +81,8 @@ def remove_directory_recursively(control_socket: socket.socket, path: str) -> bo
     if not cd(control_socket, path):
         return False
     items = ls(control_socket).splitlines()
-    if items is None:
+    if items == []:
+        cd(control_socket, current_directory)
         control_socket.sendall(f"RMD {path}\r\n".encode('utf-8'))
         response = control_socket.recv(ftpconfig.buffer_size).decode('utf-8', errors='ignore')
         if not response.startswith('250'):
